@@ -1,0 +1,37 @@
+# qc-agent:generated — gate tự động của repo này. Ghim @<commit SHA> (không @main) và image theo digest.
+# Xem docs/usage-ci.md trong repo qc-agent. Bật chặn merge: branch protection yêu cầu job `qc-agent / full-stack-fastapi-template-3` xanh.
+name: qc-gate
+on:
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+    inputs:
+      workers:
+        description: "vd semgrep,schemathesis — để trống = toàn bộ theo policy"
+        type: string
+        default: ""
+
+jobs:
+  qc:
+    permissions:               # quyền TỐI THIỂU; workflow tái sử dụng không xin thêm
+      contents: read
+      checks: write            # Check Run "qc-agent / full-stack-fastapi-template-3"
+      pull-requests: write     # comment dính trên PR
+      packages: read           # kéo image từ GHCR
+    uses: Muteen-Felix/QC-Agent/.github/workflows/qc-gate.reusable.yml@9e255aaccf0b85e6376b4a1044843578b9da403c
+    with:
+      project: full-stack-fastapi-template-3
+      image: "ghcr.io/minhduc-it/qc-agent@sha256:8d87867a641fd38f6e2ea274599d9e5d512a56d4c39a5bccc2c9f30d8aa65c5c"
+      workers: ${{ inputs.workers }}   # chạy tay: danh sách worker (rỗng = theo policy); PR: luôn rỗng
+      ghcr_username: "MinhDuc-IT"
+      sut_dockerfile: "backend/Dockerfile"
+      sut_port: "8000"  # qc-agent:todo VERIFY: cổng mặc định 8000: không thấy EXPOSE hoặc --port trong backend/Dockerfile
+      sut_health_path: "/health-check/"
+      # SUT cần database (tuỳ chọn, mặc định KHÔNG bật): bỏ comment và điền khi SUT không khởi động được chỉ bằng sut_env. Xem docs/usage-ci.md, mục "SUT cần database".
+      # sut_db_image: <image DB>@sha256:<DIGEST>                   # ghim digest; loại DB do SUT chọn
+      # sut_db_env: |                                              # KHÔNG đặt bí mật ở đây
+      #   POSTGRES_DB=app
+      # sut_db_ready_cmd: pg_isready -h 127.0.0.1 -U app           # exit 0 = DB sẵn sàng (hoặc dùng sut_db_port: "5432")
+      # Bí mật đặt ở secret của repo SUT (nhiều dòng KEY=VALUE): SUT_SECRET_ENV cho SUT (DATABASE_URL=...@db:5432/app), SUT_DB_SECRET_ENV chỉ cho container db.
+      # SUT đã chạy sẵn ở nơi khác thì khai sut_base_url thay cho cả build/chạy SUT lẫn DB.
+    secrets: inherit
