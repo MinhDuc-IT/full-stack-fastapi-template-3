@@ -4,7 +4,7 @@ import { check } from 'k6';
 
 // qc-agent:begin refine k6_paths
 // qc-agent:todo REFINE: danh sách tạm (health path): CI đề xuất các GET không tham số từ OpenAPI sống
-const PATHS = ["/health-check/"];
+const PATHS = ["/api/v1/utils/health-check/"];
 // qc-agent:end
 
 export default function () {

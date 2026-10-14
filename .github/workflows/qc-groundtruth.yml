@@ -24,7 +24,7 @@ jobs:
       contents: write          # đẩy nhánh qc-agent/gt/<prd-id>
       pull-requests: write     # mở PR
       packages: read           # kéo image từ GHCR
-    uses: Muteen-Felix/QC-Agent/.github/workflows/qc-groundtruth.reusable.yml@9e255aaccf0b85e6376b4a1044843578b9da403c
+    uses: Muteen-Felix/QC-Agent/.github/workflows/qc-groundtruth.reusable.yml@d2cef36593a6eae891aacbf1e2ab2a61c174569b
     with:
       project: full-stack-fastapi-template-3
       base_branch: "main"
@@ -42,4 +42,8 @@ jobs:
       # timeout_minutes: 60
       # agent_model: claude-sonnet-5-5
       # agent_max_cost_usd: "3"                                # trần chi phí ước tính cho một PRD
-    secrets: inherit
+    secrets:
+      GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      qc_bot_token: ${{ secrets.QC_BOT_TOKEN }}
