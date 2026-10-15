@@ -1,0 +1,52 @@
+# qc-agent:generated — gate tự động của repo này. Ghim @<commit SHA> (không @main) và image theo digest.
+# Xem docs/usage-ci.md trong repo qc-agent. Bật chặn merge: branch protection yêu cầu job `qc-agent / full-stack-fastapi-template-3` xanh.
+name: qc-gate
+on:
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+    inputs:
+      workers:
+        description: "vd semgrep,schemathesis — để trống = toàn bộ theo policy"
+        type: string
+        default: ""
+
+jobs:
+  qc:
+    permissions:               # quyền TỐI THIỂU; workflow tái sử dụng không xin thêm
+      contents: read
+      checks: write            # Check Run "qc-agent / full-stack-fastapi-template-3"
+      pull-requests: write     # comment dính trên PR
+      packages: read           # kéo image từ GHCR
+    uses: Muteen-Felix/QC-Agent/.github/workflows/qc-gate.reusable.yml@d2cef36593a6eae891aacbf1e2ab2a61c174569b
+    with:
+      project: full-stack-fastapi-template-3
+      image: "ghcr.io/minhduc-it/qc-agent@sha256:8d87867a641fd38f6e2ea274599d9e5d512a56d4c39a5bccc2c9f30d8aa65c5c"
+      workers: ${{ inputs.workers }}   # chạy tay: danh sách worker (rỗng = theo policy); PR: luôn rỗng
+      ghcr_username: "MinhDuc-IT"
+      sut_dockerfile: ".qc-agent/Dockerfile.sut"
+      sut_port: "8000"
+      sut_health_path: "/api/v1/utils/health-check/"
+      sut_context: "."
+      sut_env: |
+        PROJECT_NAME=QC Sandbox
+      sut_db_image: postgres@sha256:86e0b703649d7a792bd9243ee28afc9d8f7c6b2b5638077c9d6882d4d472bbfd
+      sut_db_env: |
+        POSTGRES_DB=app
+        POSTGRES_USER=app
+      sut_db_ready_cmd: pg_isready -h 127.0.0.1 -U app -d app
+      # Provide SUT_SECRET_ENV and SUT_DB_SECRET_ENV in repository Actions secrets.
+    secrets:
+      GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
+      SUT_SECRET_ENV: ${{ secrets.SUT_SECRET_ENV }}
+      SUT_DB_SECRET_ENV: ${{ secrets.SUT_DB_SECRET_ENV }}
+      QC_TEST_USERNAME: ${{ secrets.QC_TEST_USERNAME }}
+      QC_TEST_PASSWORD: ${{ secrets.QC_TEST_PASSWORD }}
+      qc_read_token: ${{ secrets.QC_READ_TOKEN }}
+      QC_API_TOKEN: ${{ secrets.QC_API_TOKEN }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+      JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+      JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
