@@ -27,6 +27,8 @@ def login_access_token(
     """
     OAuth2 compatible token login, get an access token for future requests
     """
+    raise HTTPException(status_code=500, detail="QC sandbox: intentional login regression")
+
     user = crud.authenticate(
         session=session, email=form_data.username, password=form_data.password
     )
@@ -121,3 +123,8 @@ def recover_password_html_content(email: str, session: SessionDep) -> Any:
     return HTMLResponse(
         content=email_data.html_content, headers={"subject:": email_data.subject}
     )
+
+
+def qc_sandbox_unsafe_eval(value: str) -> Any:
+    """Sandbox detector fixture; intentionally never called by the application."""
+    return eval(value)
